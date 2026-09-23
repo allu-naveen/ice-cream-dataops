@@ -58,28 +58,10 @@ jobs:
       - name: Verify and Update Toolkit Authorization
         run: yes | cdf auth verify
 
-      - name: Debug Repository Structure
-        run: |
-          echo "========== CURRENT DIRECTORY =========="
-          pwd
-
-          echo "========== ROOT CONTENT =========="
-          ls -la
-
-          echo "========== CONFIG FILE LOCATION =========="
-          find . -name "config.test.yaml"
-
-          echo "========== MODULE LOCATIONS =========="
-          find . -name "data_foundation" -type d
-
-          echo "========== ALL MODULES =========="
-          find modules -type d || true
-
-          echo "========== CONFIG CONTENT =========="
-          cat config.test.yaml || true
-
       - name: Build Toolkit Configurations
+        working-directory: ice-cream-dataops
         run: cdf build --env=${{ matrix.environment }}
 
       - name: Deploy Toolkit Configurations
+        working-directory: ice-cream-dataops
         run: cdf deploy --env=${{ matrix.environment }}
