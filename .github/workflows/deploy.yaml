@@ -1,10 +1,11 @@
 name: Deploy Toolkit
+
 on:
   push:
     branches:
       - main
     paths:
-      - ice-cream-dataops/**  # Make sure this matches default_organization_dir in cdf.toml
+      - ice-cream-dataops/**
   workflow_dispatch:
     inputs:
       environment:
@@ -19,28 +20,28 @@ jobs:
   build-modules:
     name: Build & Deploy
     runs-on: ubuntu-latest
+
     container:
-      image: cognite/toolkit:0.6.53  # Make sure the toolkit version matches the version in cdf.toml
+      image: cognite/toolkit:0.6.53
+
     strategy:
       matrix:
         include:
-          # Deploy to 'test' environment automatically, only on push to main branch
           - environment: ${{ inputs.environment != '' && inputs.environment || 'test' }}
 
     environment: ${{ matrix.environment }}
-    env:
-      # Cognite Toolkit environment variables
-      CDF_PROJECT: cdf-bootcamp-38-${{ matrix.environment }} # change <n> to your project number!
 
+    env:
+      CDF_PROJECT: cdf-bootcamp-38-${{ matrix.environment }}
       CDF_CLUSTER: westeurope-1
       IDP_TENANT_ID: 16e3985b-ebe8-4e24-9da4-933e21a9fc81
+
       IDP_TOKEN_URL: https://login.microsoftonline.com/16e3985b-ebe8-4e24-9da4-933e21a9fc81/oauth2/v2.0/token
       LOGIN_FLOW: client_credentials
 
       IDP_CLIENT_ID: ${{ vars.IDP_CLIENT_ID }}
       IDP_CLIENT_SECRET: ${{ secrets.IDP_CLIENT_SECRET }}
 
-      # This project's environment variables
       DATA_DEVELOPER_SOURCE_ID: ${{ vars.DATA_DEVELOPER_SOURCE_ID }}
 
       DATA_PIPELINE_OEE_CLIENT_ID: ${{ vars.DATA_PIPELINE_OEE_CLIENT_ID }}
@@ -53,9 +54,32 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Verify and Update Toolkit Authorization
         run: yes | cdf auth verify
+
+      - name: Debug Repository Structure
+        run: |
+          echo "========== CURRENT DIRECTORY =========="
+          pwd
+
+          echo "========== ROOT CONTENT =========="
+          ls -la
+
+          echo "========== CONFIG FILE LOCATION =========="
+          find . -name "config.test.yaml"
+
+          echo "========== MODULE LOCATIONS =========="
+          find . -name "data_foundation" -type d
+
+          echo "========== ALL MODULES =========="
+          find modules -type d || true
+
+          echo "========== CONFIG CONTENT =========="
+          cat config.test.yaml || true
+
       - name: Build Toolkit Configurations
         run: cdf build --env=${{ matrix.environment }}
+
       - name: Deploy Toolkit Configurations
         run: cdf deploy --env=${{ matrix.environment }}
