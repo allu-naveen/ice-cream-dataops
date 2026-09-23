@@ -58,6 +58,18 @@ jobs:
       - name: Verify and Update Toolkit Authorization
         run: yes | cdf auth verify
 
+      - name: Inspect data_foundation module
+        working-directory: ice-cream-dataops
+        run: |
+          echo "===== CURRENT DIRECTORY ====="
+          pwd
+
+          echo "===== DATA_FOUNDATION DIRECTORIES ====="
+          find modules/bootcamp/data_foundation -type d || true
+
+          echo "===== DATA_FOUNDATION FILES ====="
+          find modules/bootcamp/data_foundation -type f || true
+
       - name: Build Toolkit Configurations
         working-directory: ice-cream-dataops
         run: cdf build --env=${{ matrix.environment }}
